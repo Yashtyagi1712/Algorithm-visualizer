@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Tower of Hanoi </title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <link rel="stylesheet" href="./assets/jquery-ui.css">
+    <script src="./assets/jquery-latest.js"></script>
+    <!--<script src="jquery-1.10.2.js"></script>-->
+    <script src="./assets/jquery-ui.js"></script>
+    <script type="text/javascript" src="./assets/GetElementPosition.js"></script>
+    <link rel="stylesheet" type="text/css" href="./assets/codecolor.css" />
+    <link rel="stylesheet" type="text/css" href="./assets/boxes.css" />
+    <script src="./assets/LinkedList.js"></script>
+    <script src="./assets/Queue.js"></script>
+    <link rel="stylesheet" href="/projects/Tower of Hanoi/assets/css/header.css">
+    <link rel="stylesheet" href="./assets/css/style.css">
+    <script src="./assets/js/script.js"></script>
+  
+<!-- Global Site Tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-89940905-27"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments)};
+  gtag('js', new Date());
+  gtag('config', 'UA-89940905-27');
+</script>
+
+<script type="text/javascript" src="../logging.js"></script>
+</head>
+
+
+
+  <body  onload="init()" onresize="draw()" style="font-family: times new roman;">
+    <header id="navBar">
+      <a href="/" class="logo"><i class="fab fa-AS"></i> Recursion Visualizer</a>
+      <div id="menu" class="fas fa-bars"></div>
+      <nav class="navbar">
+        <ul>
+          <li><a class="active" href="/index.html#home">Home</a></li>
+          <li><a href="/index.html#about">How it Works</a></li>
+          <li><a href="/index.html#visualizer">Visualizer</a></li>
+          <li><a href="/index.html#team">Team</a></li>
+          <li><a href="/index.html#footer">Contact Us</a></li>
+        </ul>
+      </nav>
+    </header>
+    <!-- navbar ends -->
+    
+<!--
+    <h3 style="text-align:center; font: bold">Tower of Hanoi <--<a href="https://yongdanielliang.github.io/animation/animation.html" >Animation</a>-->
+    <!--  <a href="https://yongdanielliang.github.io/" >Y. Daniel Liang</a></h3>--
+    <p style = "alignment-adjust: central; text-align: center; max-wdith: 800px; margin-left: auto; margin-right: auto">
+      Usage: Click the Start button to move all the discs from Tower A to Tower B. Click the Reset button to reset to the initial state.
+    </p>-->
+    <div id = "program" style="margin-top:5rem;width: 610px; height: 250px; font-family: courier; font-size: 100.5%; margin: 0px auto; border: transparent; text-align: left">
+
+      <div id = "v1" class="vbar"></div>
+      <div id = "v2" class="vbar"></div>
+      <div id = "v3" class="vbar"></div>
+      <div id = "h1" style = "left: 10px; top: 219px;" class="hbar"></div>
+      <div id = "h2" style = "left: 220px; top: 219px;" class="hbar"></div>
+      <div id = "h3" style = "left: 390px; top: 219px;" class="hbar"></div>
+      <div id = "t1" style = "left: 10px; top: 219px;" class = "towerText">Tower A</div>
+      <div id = "t2" class = "towerText">Tower B</div>
+      <div id = "t3" class = "towerText">Tower C</div>
+      <div id = "d1" class = "disc"></div>
+      <div id = "d2" class = "disc"></div>
+      <div id = "d3" class = "disc"></div>
+      <div id = "d4" class = "disc"></div>
+      <div id = "d5" class = "disc"></div>
+      <div id = "d6" class = "disc"></div>
+<!--      <div id = "d7" class = "disc"></div>
+      <div id = "d8" class = "disc"></div>-->
+
+
+    </div>
+    <div style="text-align: center; margin-top: 6rem">
+      <span style="border: 0px solid #37826C; padding: 3px">
+        <label for="spinner" style = "font-weight: bold">Discs:</label>
+        <input id="spinner" name="value" style="width: 25px;">
+
+        <button id ="start" type="button" class = "button" onClick="start()">Start</button>  
+        <button id ="reset" type="button" class="button" onclick="reset()">Reset</button>
+        <!--<button id ="stop" type="button" class = "button" onclick="stop()">Stop</button>-->
+      </span>    
+    </div>
+    <div style="text-align: center; margin-top: 1em">
+      <span id = "status" style = "border-radius: .5rem;background-color: #011aff; color: white; alignment-adjust: central; text-align: center; max-wdith: 900px; margin-left: auto; margin-right: auto">
+        The number of moves for 3 discs is 7
+      </span>
+    </div>
+
+
+    <script type="text/javascript">
+
+      $("#nextButton").click(function() {
+        currentLine = currentLine + 1;
+        step();
+      });
+      $("#prevButton").click(function() {
+        currentLine = currentLine - 1;
+        step();
+      });
+
+      count = [];
+      $("#start").click(function() {
+        if (isStarted) {
+          jAlert("Click Reset and then Start");
+          return;
+        }
+        else {
+          isStarted = true;
+        }
+
+        n = $("#spinner").val();
+        count[0] = n;
+        count[1] = 0;
+        count[2] = 0;
+        moveDisks(n, 0, 1, 2);
+        $("#status").show();
+        $("#status").text("The number of moves for " +
+                n + " discs is " + queue.getSize());
+//          tuple = queue.dequeue();
+//          jAlert(tuple.n + ", " + tuple.fromTower + ", " + tuple.toTower);
+        animateMoves(queue);
+      });
+
+      function animateMoves(queue) {
+        d = 0;
+        if (!queue.isEmpty()) {
+          tuple = queue.dequeue();
+//          jAlert(tuple.n + ", " + tuple.fromTower + ", " + tuple.toTower);
+
+          left1 = x + (40 + 150) * tuple.toTower + 40 + (8 - tuple.n) * 7;
+          top1 = y + 220 - (count[tuple.toTower] + 1) * 20;
+          count[tuple.fromTower]--;
+          count[tuple.toTower]++;
+//          jAlert( "OVER " + tuple.n + ", " + tuple.fromTower + ", " + tuple.toTower);
+
+          $("#d" + tuple.n).animate({top: y + 40}, slowAnimationSpeed, function() {
+            $("#d" + tuple.n).animate({left: left1}, slowAnimationSpeed, function() {
+              $("#d" + tuple.n).animate({top: top1, left: left1}, slowAnimationSpeed, function() {
+                animateMoves(queue);
+              });
+            });
+          });
+
+//          $("#d" + tuple.n).animate({top: top1, left: left1}, slowAnimationSpeed);
+//          $("#flyingReturnValue").animate({top: value1Top + 40, left: value1Left}, slowAnimationSpeed);
+          d++;
+        }
+      }
+      isStarted = false;
+      $("#reset").click(function() {
+        isStarted = false;
+        n = 3;
+        $("#spinner").val(3);
+        queue = new Queue();
+        for (var i = 1; i <= 6; i++) {
+          $("#d" + i).stop();
+        }
+        init();
+      });
+
+      $("#spinner").click(function() {
+        jAlert("clicked");
+        n = $("#spinner").val();
+        init();
+      });
+
+      $(function() {
+        var temp = $("#spinner").spinner({
+          step: 1,
+          spin: function(event, ui) {
+            handleSpinnerValue(ui.value);
+          }
+        });
+      });
+
+      function handleSpinnerValue(txtValue)
+      {
+        if (isStarted) {
+          jAlert("Please click Reset before setting the disc numbers");
+        }
+        else {
+          n = txtValue;
+          init();
+        }
+      }
+      function fly(n, fromTower, toTower) {
+        left1 = x + (40 + 150) * toTower + 40 + (8 - n) * 7;
+        top1 = y + 220 - (count[toTower] + 1) * 20;
+        $("#d" + n).animate({top: y + 40}, slowAnimationSpeed);
+        $("#d" + n).animate({left: left1}, slowAnimationSpeed);
+        $("#d" + n).animate({top: top1, left: left1}, slowAnimationSpeed);
+//          $("#flyingReturnValue").animate({top: value1Top + 40, left: value1Left}, slowAnimationSpeed);
+        count[fromTower]--;
+        count[toTower]++;
+      }
+
+      queue = new Queue();
+      function moveDisks(n, fromTower, toTower, auxTower) {
+        if (n == 1) { // Stopping condition
+//              jAlert("Move disk " + n + " from " +
+//                      fromTower + " to " + toTower);
+          tuple = new Object();
+          tuple.n = n;
+          tuple.toTower = toTower;
+          tuple.fromTower = fromTower;
+          queue.enqueue(tuple);
+          //   fly(n, fromTower, toTower);
+        }
+        else {
+          moveDisks(n - 1, fromTower, auxTower, toTower);
+          // fly(n, fromTower, toTower);
+          tuple = new Object();
+          tuple.n = n;
+          tuple.toTower = toTower;
+          tuple.fromTower = fromTower;
+          queue.enqueue(tuple);
+          moveDisks(n - 1, auxTower, toTower, fromTower);
+        }
+      }
+
+// Constructor for Tuple
+      function Tuple(n, fromTower, toTower) {
+        this.n = n;
+        this.toTower = toTower;
+        this.fromTower = fromTower;
+      }
+
+      function startOver() {
+        init();
+      }
+
+      function step() {
+        pos = getElementPos(document.getElementById('line' + currentLine));
+//          $("#explanation").animate({top: explanation[currentLine].top, left: explanation[currentLine].left,
+//              width: explanation[currentLine].width}, animationSpeed);
+//          $("#commandPrompt").animate({top: commandPrompt[currentLine].top, left: commandPrompt[currentLine].left}, animationSpeed);
+//
+        if (currentLine == 0) {
+          document.getElementById('prevButton').style.visibility = 'hidden';
+          document.getElementById('memory').style.visibility = 'hidden';
+          document.getElementById('flyingRadius').style.visibility = 'hidden';
+          document.getElementById('flyingRadius').innerHTML = '';
+          document.getElementById('value1').innerHTML = '';
+          document.getElementById('radius').style.visibility = 'hidden';
+          $("#explanation").animate({top: pos0.y - 30,
+            left: pos0.x + pos0.w + 20,
+            width: 200, height: explanation[currentLine].height}, 'fast');
+          $("#commandPrompt").animate({top: pos2.y + 15,
+            left: pos0.x + pos0.w + 15, }, 'fast');
+          document.getElementById('commandPrompt').style.visibility = 'hidden';
+        }
+        else if (currentLine == 1) {
+          document.getElementById('prevButton').style.visibility = 'visible';
+          document.getElementById('prevButton').style.display = 'inline';
+          number1 = Math.floor(Math.random() * 10);
+          explanation[1].innerHTML = "The statement generates a random number " + number1 + " and assigns it to variable number1.";
+          document.getElementById('memory').style.visibility = 'visible';
+          document.getElementById('flyingRadius').style.visibility = 'visible';
+          document.getElementById('flyingRadius').innerHTML = '';
+          document.getElementById('value1').innerHTML = '';
+          document.getElementById('radius').style.visibility = 'visible';
+//
+//          document.getElementById('value1').style.visibility = 'visible';
+
+          posLoc1 = getElementPos(document.getElementById('loc1'));
+          $("#highlight").animate({top: highLight[currentLine].top, left: highLight[currentLine].left,
+            width: highLight[currentLine].width}, animationSpeed, function() {
+            $("#flyingRadius").css("top", posLoc1.y).css("left", posLoc1.x);
+            document.getElementById('flyingRadius').innerHTML = number1;
+            $("#flyingRadius").animate(
+                    {top: value1Top - 50, left: value1Left}, slowAnimationSpeed);
+          });
+          document.getElementById('flyingArea').style.visibility = 'hidden';
+          document.getElementById('value2').innerHTML = '';
+          document.getElementById('area').style.visibility = 'hidden';
+          $("#explanation").animate({top: pos.y + 30,
+            left: variableLeft,
+            width: 200, height: explanation[currentLine].height}, 'fast');
+        }
+        else if (currentLine == 2) {
+          document.getElementById('flyingArea').innerHTML = '';
+          number2 = Math.floor(Math.random() * 10);
+          explanation[2].innerHTML = "The statement generates a random number " + number2 + " and assigns it to variable number2.";
+          commandPrompt[4].innerHTML = "What is " + number1 + " + " + number2 + "? ";
+          $("#explanation").animate({top: pos.y + 15,
+            left: variableLeft,
+            width: 200, height: explanation[currentLine].height}, 'fast');
+          document.getElementById('flyingArea').style.visibility = 'visible';
+          document.getElementById('value2').innerHTML = '';
+          document.getElementById('area').style.visibility = 'visible';
+//
+//          document.getElementById('value1').style.visibility = 'visible';
+
+          posLoc2 = getElementPos(document.getElementById('loc2'));
+          $("#highlight").animate({top: highLight[currentLine].top, left: highLight[currentLine].left,
+            width: highLight[currentLine].width, height: highLight[currentLine].height}, animationSpeed, function() {
+            $("#flyingArea").css("top", posLoc2.y).css("left", posLoc2.x);
+            document.getElementById('flyingArea').innerHTML = number2;
+            $("#flyingArea").animate(
+                    {top: value1Top - 30, left: value1Left}, slowAnimationSpeed);
+          });
+        }
+        else if (currentLine == 3) {
+          pos3 = getElementPos(document.getElementById('line' + currentLine));
+          $("#explanation").animate({top: pos3.y - 30,
+            left: variableLeft,
+            width: 200, height: explanation[currentLine].height}, 'fast');
+        }
+        else if (currentLine == 4) {
+          document.getElementById('flyingAnswer').style.visibility = 'hidden';
+          document.getElementById('flyingAnswer').innerHTML = '';
+          document.getElementById('value3').innerHTML = '';
+          document.getElementById('answer').style.visibility = 'hidden';
+          $("#explanation").animate({top: pos3.y - 20,
+            left: variableLeft,
+            width: 200, height: explanation[currentLine].height}, 'fast');
+          pos5 = getElementPos(document.getElementById('line5'));
+          pos7 = getElementPos(document.getElementById('line7'));
+          $("#commandPrompt").animate({top: pos7.y - 10,
+            left: pos5.x + pos5.w + 45, }, 'fast');
+        }
+        else if (currentLine == 5) {
+          document.getElementById('memory').style.visibility = 'visible';
+          document.getElementById('flyingAnswer').style.visibility = 'visible';
+          document.getElementById('flyingAnswer').innerHTML = '';
+          document.getElementById('value3').innerHTML = '';
+          document.getElementById('answer').style.visibility = 'visible';
+          document.getElementById('explanation').style.visibility = 'hidden';
+          answer = prompt("Here is your chance to enter an answer for " + number1 + " + " + number2 + "? ");
+          result = (answer == number1 + number2);
+          explanation[5].innerHTML = "The statement receives the input " + answer + " from the user.";
+          commandPrompt[5].innerHTML = commandPrompt[4].innerHTML + answer;
+          commandPrompt[6].innerHTML = commandPrompt[5].innerHTML + "\n" + number1 + " + " + number2 + " = " + answer + " is " + result;
+          commandPrompt[7].innerHTML = commandPrompt[6].innerHTML + "";
+          document.getElementById('explanation').style.visibility = 'visible';
+          $("#explanation").animate({top: pos.y - 10,
+            left: pos.x + pos.w + 20,
+            width: 200, height: explanation[currentLine].height}, 'fast');
+          pos5 = getElementPos(document.getElementById('line5'));
+          pos7 = getElementPos(document.getElementById('line7'));
+          $("#commandPrompt").animate({top: pos7.y - 10,
+            left: pos5.x + pos5.w + 45, }, 'fast');
+          posLoc3 = getElementPos(document.getElementById('loc3'));
+          $("#highlight").animate({top: highLight[currentLine].top, left: highLight[currentLine].left,
+            width: highLight[currentLine].width, height: highLight[currentLine].height}, animationSpeed, function() {
+            $("#flyingAnswer").css("top", posLoc3.y).css("left", posLoc3.x);
+            document.getElementById('flyingAnswer').innerHTML = answer;
+            $("#flyingAnswer").animate({top: value1Top + 55, left: value1Left}, slowAnimationSpeed);
+          });
+        }
+        else if (currentLine == 6) {
+          $("#explanation").animate({top: pos.y - 30,
+            left: pos.x + pos.w - 140,
+            width: 200, height: explanation[currentLine].height}, 'fast');
+          $("#commandPrompt").animate({top: pos7.y - 10,
+            left: pos5.x + pos5.w + 45, }, 'fast');
+        }
+        else if (currentLine == 7) {
+          $("#explanation").animate({top: pos.y - 5,
+            left: pos.x + pos.w + 40,
+            width: 200, height: explanation[currentLine].height}, 'fast');
+          $("#commandPrompt").animate({top: pos7.y - 10,
+            left: pos5.x + pos5.w + 45, }, 'fast');
+          document.getElementById('startButton').style.visibility = 'visible';
+          document.getElementById('startButton').style.display = 'inline';
+          document.getElementById('startButton').innerHTML = 'Restart Animation';
+        }
+        else {
+          $("#highlight").animate({top: highLight[currentLine].top, left: highLight[currentLine].left,
+            width: highLight[currentLine].width, height: highLight[currentLine].height}, animationSpeed);
+        }
+
+        if (currentLine == 5) {
+          document.getElementById('commandPrompt').style.visibility = 'visible';
+        }
+
+        if (commandPrompt[currentLine].isVisible) {
+          document.getElementById('commandPrompt').style.visibility = 'visible';
+          document.getElementById('commandPromptContent').innerHTML = commandPrompt[currentLine].innerHTML;
+        }
+        else {
+          document.getElementById('commandPrompt').style.visibility = 'hidden';
+        }
+      }
+
+    </script>
+  </body>
+</html>
